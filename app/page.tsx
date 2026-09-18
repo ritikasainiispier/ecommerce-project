@@ -1,69 +1,204 @@
 import Image from "next/image";
+import Link from "next/link";
+import { supabase } from "../lib/supabase";
 
-export default function Home() {
+export const dynamic = "force-dynamic";
+
+type ProductRow = {
+  id: string;
+  name: string;
+  categories:
+    | { name: string }
+    | { name: string }[]
+    | null;
+
+  product_images:
+    | {
+        image_url: string;
+        sort_order: number | null;
+      }[]
+    | null;
+};
+
+export default async function Home() {
+  const { data } = await supabase
+    .from("products")
+    .select(`
+      id,
+      name,
+      categories (
+        name
+      ),
+      product_images (
+        image_url,
+        sort_order
+      )
+    `)
+    .eq("status", "active");
+
+  const products = (data ?? []) as unknown as ProductRow[];
+
+  const categoryImages: Record<string, string | null> = {
+    Clothing: null,
+    Shoes: null,
+    Accessories: null,
+  };
+
+  products.forEach((product) => {
+    const categoryName = Array.isArray(product.categories)
+      ? product.categories[0]?.name
+      : product.categories?.name;
+
+    if (!categoryName) {
+      return;
+    }
+
+    const images = Array.isArray(product.product_images)
+      ? [...product.product_images].sort(
+          (a, b) =>
+            (a.sort_order ?? 0) -
+            (b.sort_order ?? 0)
+        )
+      : [];
+
+    const imageUrl = images[0]?.image_url ?? null;
+
+    if (
+      imageUrl &&
+      categoryName in categoryImages &&
+      !categoryImages[categoryName]
+    ) {
+      categoryImages[categoryName] = imageUrl;
+    }
+  });
+
+  const categories = [
+    {
+      name: "Clothing",
+      href: "/shop",
+      image: categoryImages.Clothing,
+    },
+    {
+      name: "Shoes",
+      href: "/shop",
+      image: categoryImages.Shoes,
+    },
+    {
+      name: "Accessories",
+      href: "/shop",
+      image: categoryImages.Accessories,
+    },
+  ];
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert h-5 w-[100px]"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the{" "}
-            <code className="rounded bg-black/[.06] px-1.5 py-0.5 font-mono text-[0.9em] dark:bg-white/[.08]">
-              page.tsx
-            </code>{" "}
-            file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main className="min-h-screen bg-white text-black">
+
+      {/* Header */}
+      <header className="flex items-center justify-between border-b px-8 py-5">
+        <Link href="/" className="text-2xl font-bold">
+          MY STORE
+        </Link>
+
+        <nav className="flex gap-8">
+          <Link href="/">Home</Link>
+          <Link href="/shop">Shop</Link>
+          <Link href="/cart">Cart</Link>
+        </nav>
+      </header>
+
+      {/* Hero */}
+      <section className="flex min-h-[550px] items-center justify-center bg-gray-100 px-8 text-center">
+        <div>
+          <p className="mb-4 text-sm uppercase tracking-[4px]">
+            New Collection
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
+
+          <h1 className="mb-6 text-6xl font-bold">
+            Style That Speaks
+          </h1>
+
+          <p className="mx-auto mb-8 max-w-xl text-lg text-gray-600">
+            Discover clothing, footwear and accessories designed
+            for everyday style.
+          </p>
+
+          <Link
+            href="/shop"
+            className="inline-block bg-black px-8 py-4 text-white"
           >
-            <Image
-              className="dark:invert h-[14px] w-4"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
+            Shop Now
+          </Link>
         </div>
-      </main>
-    </div>
+      </section>
+
+      {/* Categories */}
+      <section className="px-6 py-20">
+
+        <h2 className="mb-12 text-center text-4xl font-bold">
+          Shop by Category
+        </h2>
+
+        <div className="grid gap-6 md:grid-cols-3">
+
+          {categories.map((category) => (
+            <div
+              key={category.name}
+              className="overflow-hidden border"
+            >
+
+              {/* Category Image */}
+              <div className="relative h-80 bg-gray-200">
+
+                {category.image ? (
+                  <Image
+                    src={category.image}
+                    alt={category.name}
+                    fill
+                    sizes="(max-width: 768px) 100vw, 33vw"
+                    className="object-contain p-3"
+                  />
+                ) : (
+                  <div className="flex h-full items-center justify-center text-gray-500">
+                    No Image
+                  </div>
+                )}
+
+              </div>
+
+              {/* Category Details */}
+              <div className="p-6">
+
+                <h3 className="mb-2 text-3xl font-bold">
+                  {category.name}
+                </h3>
+
+                <Link
+                  href={category.href}
+                  className="underline"
+                >
+                  Shop Now
+                </Link>
+
+              </div>
+
+            </div>
+          ))}
+
+        </div>
+
+      </section>
+
+      {/* Footer */}
+      <footer className="bg-black px-8 py-12 text-center text-white">
+        <h2 className="text-2xl font-bold">
+          MY STORE
+        </h2>
+
+        <p className="mt-2 text-gray-400">
+          Fashion. Footwear. Accessories.
+        </p>
+      </footer>
+
+    </main>
   );
 }
