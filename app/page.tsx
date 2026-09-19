@@ -192,16 +192,22 @@ export default async function Home() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black px-8 py-12 text-center text-white">
-        <h2 className="text-2xl font-bold">
-          MY STORE
-        </h2>
+      <footer className="border-t border-gray-200 bg-white px-6 py-8">
+  <div className="mx-auto flex max-w-6xl flex-col items-center justify-between gap-3 md:flex-row">
 
-        <p className="mt-2 text-gray-400">
-          Fashion. Footwear. Accessories.
-        </p>
-      </footer>
+    <p className="text-sm text-gray-500">
+      © 2026 My Store
+    </p>
 
-    </main>
-  );
-}
+    <p className="text-sm text-gray-500">
+      Built by{" "}
+      <a
+        href="https://ritika.aavdigitalmarketing.co"
+        className="font-semibold text-black underline underline-offset-4 hover:text-indigo-600"
+      >
+        Ritika Saini
+      </a>
+    </p>
+
+  </div>
+</footer>
