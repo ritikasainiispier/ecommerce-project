@@ -93,8 +93,8 @@ export default async function Home() {
   return (
     <main className="min-h-screen bg-white text-black">
       <div className="bg-black px-4 py-3 text-center text-sm font-semibold text-white">
-  This website is made by Ritika
-</div>
+         This website is made by Ritika
+      </div>
 
       {/* Header */}
       <header className="flex items-center justify-between border-b px-8 py-5">
